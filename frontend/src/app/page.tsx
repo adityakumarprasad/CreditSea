@@ -42,7 +42,10 @@ export default function Home() {
 
           <div className="max-w-4xl mx-auto text-center relative z-10">
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs text-teal-400 mb-6 font-medium">
-              <span>🚀 Premium Loan Management System</span>
+              <svg className="w-3.5 h-3.5 text-teal-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.814zM19.071 4.929l-.353 2.214-2.215.353 2.215.353.353 2.215.353-2.215 2.215-.353-2.215-.353-.353-2.214z" />
+              </svg>
+              <span>Premium Loan Management System</span>
             </div>
             
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight">
