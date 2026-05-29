@@ -109,8 +109,51 @@ export default function BorrowerPortal() {
     setErrorMsg(null);
     setBreErrors([]);
 
-    if (!pan || !dob || !monthlySalary || !employmentMode) {
+    if (!pan || !dob || monthlySalary === undefined || !employmentMode) {
       setErrorMsg('Please complete all form fields');
+      return;
+    }
+
+    // Client-side validations (Business Rule Engine mirroring)
+    const clientErrors: string[] = [];
+
+    // 1. Age check (between 23 and 50)
+    const dobDate = new Date(dob);
+    if (isNaN(dobDate.getTime())) {
+      clientErrors.push('Invalid Date of Birth format.');
+    } else {
+      const today = new Date();
+      let age = today.getFullYear() - dobDate.getFullYear();
+      const monthDifference = today.getMonth() - dobDate.getMonth();
+      if (
+        monthDifference < 0 ||
+        (monthDifference === 0 && today.getDate() < dobDate.getDate())
+      ) {
+        age--;
+      }
+      if (age < 23 || age > 50) {
+        clientErrors.push(`Age must be between 23 and 50 years. Current calculated age is ${age}.`);
+      }
+    }
+
+    // 2. Salary check (>= 25000)
+    if (Number(monthlySalary) < 25000) {
+      clientErrors.push('Monthly net salary must be at least ₹25,000.');
+    }
+
+    // 3. PAN validation
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    if (!panRegex.test(pan.toUpperCase().trim())) {
+      clientErrors.push('Invalid PAN card format. Format must match standard (e.g., ABCDE1234F).');
+    }
+
+    // 4. Employment mode validation
+    if (employmentMode === 'Unemployed') {
+      clientErrors.push('Employment status cannot be Unemployed.');
+    }
+
+    if (clientErrors.length > 0) {
+      setBreErrors(clientErrors);
       return;
     }
 
@@ -133,7 +176,8 @@ export default function BorrowerPortal() {
     } catch (err: any) {
       if (err.message.includes('BRE') || err.message.includes('Validation Failed')) {
         // Fetch BRE errors from API rejection
-        setBreErrors(err.message.split('\n') || ['Business criteria mismatch']);
+        const errorLines = err.message.split('\n');
+        setBreErrors(errorLines.length > 0 ? errorLines : ['Business criteria mismatch']);
       } else {
         setErrorMsg(err.message || 'An error occurred during verification.');
       }
