@@ -177,7 +177,7 @@ export default function CollectionLedger() {
                 <span className="font-bold text-slate-400 uppercase tracking-wider block">
                   Payment History
                 </span>
-                
+
                 {payments && payments.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
@@ -246,13 +246,13 @@ export default function CollectionLedger() {
                           type="number"
                           required
                           min={0.01}
-                          step="0.01"
+                          step="1.00"
                           max={loan.outstandingBalance}
                           value={amountInputs[loan._id] || ''}
                           onChange={(e) =>
                             setAmountInputs((prev) => ({ ...prev, [loan._id]: Number(e.target.value) }))
                           }
-                          placeholder="e.g. 50000.50"
+                          placeholder="e.g. 50000"
                           className="w-full px-3 py-2 bg-slate-950 border border-slate-800 focus:border-teal-500 rounded-xl text-white text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/10"
                         />
                       </div>
