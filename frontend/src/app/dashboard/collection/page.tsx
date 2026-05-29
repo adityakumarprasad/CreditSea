@@ -246,13 +246,13 @@ export default function CollectionLedger() {
                           type="number"
                           required
                           min={0.01}
-                          step="1.00"
+                          step="0.01"
                           max={loan.outstandingBalance}
                           value={amountInputs[loan._id] || ''}
                           onChange={(e) =>
                             setAmountInputs((prev) => ({ ...prev, [loan._id]: Number(e.target.value) }))
                           }
-                          placeholder="e.g. 50000"
+                          placeholder="e.g. 50000.50"
                           className="w-full px-3 py-2 bg-slate-950 border border-slate-800 focus:border-teal-500 rounded-xl text-white text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/10"
                         />
                       </div>
