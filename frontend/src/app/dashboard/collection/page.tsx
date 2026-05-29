@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import Unauthorized from '@/components/Unauthorized';
 
 export default function CollectionLedger() {
   const { apiFetch, user } = useAuth();
@@ -95,12 +96,7 @@ export default function CollectionLedger() {
 
   // Restrict access client-side
   if (user && user.role !== 'Collection' && user.role !== 'Admin') {
-    return (
-      <div className="p-8 border border-rose-500/20 bg-rose-500/5 text-rose-400 rounded-2xl">
-        <h2 className="font-bold text-lg">403 - Forbidden</h2>
-        <p className="text-sm mt-1">You do not have permissions to access the Collection Ledger.</p>
-      </div>
-    );
+    return <Unauthorized requiredRoles={['Collection']} />;
   }
 
   return (
