@@ -1,0 +1,30 @@
+# Dependency directories
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor / OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Uploaded salary slips
+backend/uploads/*
+!backend/uploads/.gitkeep
