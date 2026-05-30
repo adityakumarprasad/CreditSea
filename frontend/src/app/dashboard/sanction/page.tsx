@@ -1,8 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, API_BASE_URL } from '@/context/AuthContext';
 import Unauthorized from '@/components/Unauthorized';
+
+const getFileUrl = (url: string) => {
+  if (!url) return '#';
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  const root = API_BASE_URL.replace(/\/api$/, '');
+  return `${root}${url}`;
+};
+
 
 export default function SanctionReviews() {
   const { apiFetch, user } = useAuth();
@@ -167,7 +177,7 @@ export default function SanctionReviews() {
                     <span className="text-slate-550 block">Salary Slip</span>
                     {profile.salarySlipUrl ? (
                       <a
-                        href={`http://localhost:5000${profile.salarySlipUrl}`}
+                        href={getFileUrl(profile.salarySlipUrl)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-teal-400 hover:text-teal-350 underline font-bold"

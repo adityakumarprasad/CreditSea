@@ -1,8 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, API_BASE_URL } from '@/context/AuthContext';
 import Unauthorized from '@/components/Unauthorized';
+
+const getFileUrl = (url: string) => {
+  if (!url) return '#';
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  const root = API_BASE_URL.replace(/\/api$/, '');
+  return `${root}${url}`;
+};
+
 
 export default function SalesLeads() {
   const { apiFetch, user } = useAuth();
@@ -112,7 +122,7 @@ export default function SalesLeads() {
                       <p className="font-bold text-slate-350">
                         {lead.profile.salarySlipUrl ? (
                           <a
-                            href={`http://localhost:5000${lead.profile.salarySlipUrl}`}
+                            href={getFileUrl(lead.profile.salarySlipUrl)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-teal-400 hover:text-teal-350 underline"
