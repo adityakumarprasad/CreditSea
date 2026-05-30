@@ -2,6 +2,8 @@ import { Router, Response, NextFunction } from 'express';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
+import { S3Client } from '@aws-sdk/client-s3';
+import multerS3 from 'multer-s3';
 import { authenticateToken, AuthenticatedRequest, requireRoles } from '../middlewares/auth';
 import BorrowerProfile from '../models/BorrowerProfile';
 import Loan from '../models/Loan';
@@ -9,22 +11,54 @@ import { runBRE } from '../utils/bre';
 
 const router = Router();
 
-// Ensure upload directory exists
+// Ensure local upload directory exists (fallback)
 const uploadDir = path.join(__dirname, '../../uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Multer Storage Configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
+// Check if AWS S3 environment credentials are set
+const isAwsConfigured = 
+  process.env.AWS_ACCESS_KEY_ID && 
+  process.env.AWS_SECRET_ACCESS_KEY && 
+  process.env.AWS_S3_BUCKET_NAME && 
+  process.env.AWS_REGION;
+
+let storage;
+
+if (isAwsConfigured) {
+  console.log('AWS S3 Configuration detected. Initializing S3 upload engine...');
+  const s3 = new S3Client({
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    },
+    region: process.env.AWS_REGION!,
+  });
+
+  storage = multerS3({
+    s3: s3,
+    bucket: process.env.AWS_S3_BUCKET_NAME!,
+    metadata: (req, file, cb) => {
+      cb(null, { fieldName: file.fieldname });
+    },
+    key: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      cb(null, 'salary-slips/' + uniqueSuffix + path.extname(file.originalname));
+    },
+  });
+} else {
+  console.log('AWS S3 variables missing. Initializing Local Disk upload engine...');
+  storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      cb(null, uniqueSuffix + path.extname(file.originalname));
+    },
+  });
+}
 
 const upload = multer({
   storage,
@@ -135,8 +169,11 @@ router.post('/upload-slip', (req: AuthenticatedRequest, res: Response, next: Nex
         return;
       }
 
-      // Store relative path
-      const salarySlipUrl = `/uploads/${req.file.filename}`;
+      // Dynamically select between local files and S3 urls
+      const salarySlipUrl = (req.file as any).location 
+        ? (req.file as any).location 
+        : `/uploads/${req.file.filename}`;
+
       profile.salarySlipUrl = salarySlipUrl;
       await profile.save();
 
