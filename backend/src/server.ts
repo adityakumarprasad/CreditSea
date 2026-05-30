@@ -17,7 +17,7 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/creditsea'
 
 // Middlewares
 app.use(cors({
-  origin: '*', // For development testing. In production, restrict to frontend domain.
+  origin: true, // Dynamically reflects requesting origin back, allowing credentials securely
   credentials: true,
 }));
 app.use(express.json());
