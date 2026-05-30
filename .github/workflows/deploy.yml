@@ -1,4 +1,4 @@
-name: Deploy Express Backend to AWS EC2
+name: Build and Deploy Express Backend to AWS EC2
 
 on:
   push:
@@ -8,14 +8,32 @@ on:
       - 'backend/**' # Only trigger when backend files are updated
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: './backend/package-lock.json'
+
+      - name: Install Dependencies
+        run: |
+          cd backend
+          npm install
+
+      - name: Verify Backend Build (TypeScript Compile)
+        run: |
+          cd backend
+          npm run build
+
       - name: Execute Deployment Commands on EC2 via SSH
+        if: success()
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -30,7 +48,7 @@ jobs:
             git reset --hard
             git pull origin main
 
-            # 3. Install dependencies (required to compile TypeScript)
+            # 3. Install dependencies
             npm install
 
             # 4. Compile TypeScript source code to the dist/ output directory
