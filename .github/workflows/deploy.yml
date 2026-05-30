@@ -1,0 +1,40 @@
+name: Deploy Express Backend to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**' # Only trigger when backend files are updated
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Deployment Commands on EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            # 1. Navigate to the backend project directory
+            cd ~/CreditSea/backend
+
+            # 2. Reset any local changes and pull latest main branch updates
+            git reset --hard
+            git pull origin main
+
+            # 3. Install dependencies (required to compile TypeScript)
+            npm install
+
+            # 4. Compile TypeScript source code to the dist/ output directory
+            npm run build
+
+            # 5. Restart PM2 backend process or start it if not already running
+            pm2 restart creditsea-api || pm2 start dist/server.js --name "creditsea-api"
