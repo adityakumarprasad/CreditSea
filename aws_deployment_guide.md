@@ -37,6 +37,28 @@ To allow your frontend (which will be hosted on a different URL) to access S3 di
    ```
 5. Click **Save changes**.
 
+### 3. Add Bucket Policy for Public Read Access
+To allow the sanction and sales executives to view/download the uploaded PDF salary slips, the bucket must permit public reading of objects:
+1. Inside your bucket, go to the **Permissions** tab.
+2. Scroll down to **Bucket policy** and click **Edit**.
+3. Paste the following policy (replace `YOUR_BUCKET_NAME` with your actual bucket name, e.g., `creditsea-documents`):
+   ```json
+   {
+       "Version": "2012-10-17",
+       "Statement": [
+           {
+               "Sid": "PublicReadGetObject",
+               "Effect": "Allow",
+               "Principal": "*",
+               "Action": "s3:GetObject",
+               "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/*"
+           }
+       ]
+   }
+   ```
+4. Click **Save changes**.
+
+
 ### 3. Create an IAM User and Get API Keys
 1. Open the **IAM** service in AWS Console.
 2. Go to **Users** in the sidebar and click **Create user**.
